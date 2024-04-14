@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class UploadSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +21,10 @@ public class UploadSession {
     private LocalDateTime endTime;
     private String status;
 
+    public UploadSession(long userId, LocalDateTime startTime, LocalDateTime endTime, String status) {
+        this.userId = userId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = status;
+    }
 }

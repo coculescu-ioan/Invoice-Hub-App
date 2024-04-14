@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class FileReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +22,13 @@ public class FileReport {
     private long size;
     private long userId;
     private String status;
+
+    public FileReport(String filename, String filetype, LocalDate dateUploaded, long size, long userId, String status) {
+        this.filename = filename;
+        this.filetype = filetype;
+        this.dateUploaded = dateUploaded;
+        this.size = size;
+        this.userId = userId;
+        this.status = status;
+    }
 }
