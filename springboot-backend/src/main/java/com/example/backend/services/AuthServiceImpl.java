@@ -4,12 +4,15 @@ import com.example.backend.dtos.requests.ChangePasswordRequest;
 import com.example.backend.dtos.requests.ForgetPasswordRequest;
 import com.example.backend.dtos.requests.LoginRequest;
 import com.example.backend.dtos.requests.SignupRequest;
+import com.example.backend.enums.UserRole;
 import com.example.backend.models.User;
 import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -34,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
         user.setUsername(signupRequest.getUsername());
         user.setEmail(signupRequest.getEmail());
         user.setPassword(signupRequest.getPassword());
-
+        user.setRole(UserRole.USER);
         userService.createUser(user);
 
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
@@ -45,7 +48,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElse(null);
 
-        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
+        // avoiding null pointer exception : Objects.equals()
+        if (user == null || !Objects.equals(user.getPassword(), loginRequest.getPassword())) {
             return new ResponseEntity<>("Invalid username/email or password!", HttpStatus.UNAUTHORIZED);
         }
 
@@ -56,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<?> changePassword(ChangePasswordRequest changePasswordRequest) {
         User user = userRepository.findByUsername(changePasswordRequest.getUsername()).orElse(null);
 
-        if (user == null || !user.getPassword().equals(changePasswordRequest.getCurrentPassword())) {
+        if (user == null || !Objects.equals(user.getPassword(), changePasswordRequest.getCurrentPassword())) {
             return new ResponseEntity<>("Invalid username/email or current password!", HttpStatus.UNAUTHORIZED);
         }
 
@@ -68,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> forgetPassword(ForgetPasswordRequest forgetPasswordRequest) {
-        // Logic needed
+        // business logic needed : email sending mechanism
         return new ResponseEntity<>("Password reset instructions sent to the provided email", HttpStatus.OK);
     }
 }

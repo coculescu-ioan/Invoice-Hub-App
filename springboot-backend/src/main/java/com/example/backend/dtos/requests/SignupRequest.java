@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SignupRequest {
+    //validation not working
     @NotBlank(message = "Username is required")
     @Size(min = 6, max = 20, message = "Username must be between 6 and 20 characters")
     private String username;
