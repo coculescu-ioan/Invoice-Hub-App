@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElse(null);
 
-        // avoiding null pointer exception : Objects.equals()
+        // Avoiding null pointer exception : Objects.equals()
         if (user == null || !Objects.equals(user.getPassword(), loginRequest.getPassword())) {
             return new ResponseEntity<>("Invalid username/email or password!", HttpStatus.UNAUTHORIZED);
         }
@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> forgetPassword(ForgetPasswordRequest forgetPasswordRequest) {
-        // business logic needed : email sending mechanism
+        // BUSINESS LOGIC : email sending mechanism
         return new ResponseEntity<>("Password reset instructions sent to the provided email", HttpStatus.OK);
     }
 }
