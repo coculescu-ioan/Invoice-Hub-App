@@ -6,7 +6,7 @@ import com.example.backend.dtos.requests.LoginRequest;
 import com.example.backend.dtos.requests.SignupRequest;
 import com.example.backend.enums.UserRole;
 import com.example.backend.models.User;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

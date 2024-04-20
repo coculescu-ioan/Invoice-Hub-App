@@ -5,7 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Table(name="uploadsession")
+@Table(name="upload_session")
 @Data
 @Entity
 @Getter
