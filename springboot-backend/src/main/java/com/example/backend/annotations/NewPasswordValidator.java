@@ -8,7 +8,10 @@ import java.util.Objects;
 
 public class NewPasswordValidator implements ConstraintValidator<ValidNewPassword, ChangePasswordRequest> {
     @Override
-    public boolean isValid(ChangePasswordRequest changePasswordRequest, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(ChangePasswordRequest changePasswordRequest,
+                           ConstraintValidatorContext constraintValidatorContext) {
         return !Objects.equals(changePasswordRequest.getCurrentPassword(), changePasswordRequest.getNewPassword());
     }
+
+
 }
