@@ -1,16 +1,22 @@
 package com.example.backend.services;
 
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.example.backend.enums.ValidationRulesEnum;
 import com.example.backend.exceptions.StorageException;
 import com.example.backend.exceptions.StorageFileNotFoundException;
 import com.example.backend.models.FileReport;
@@ -80,9 +86,14 @@ public class StorageServiceImpl implements StorageService {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            session.setStatus("Success");
-            session.setEndTime(LocalDateTime.now());
+            if(isStructureValid(file.getInputStream())) {
+                session.setStatus("Success");
+            }
+            else {
+                session.setStatus("Failed");
+            }
 
+            session.setEndTime(LocalDateTime.now());
             storeFileReport(file, session);
 
             uploadSessionRepository.save(session);
@@ -107,6 +118,34 @@ public class StorageServiceImpl implements StorageService {
         fileReport.setDateUploaded(session.getEndTime().toLocalDate());
         fileReport.setStatus(session.getStatus());
         fileReportRepository.save(fileReport);
+    }
+
+    private static boolean isStructureValid(InputStream contents) throws IOException {
+        int lineIndex = 0;
+        int validLines = 0;
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(contents))) {
+
+            String line;
+            while((line = reader.readLine()) != null) {
+                lineIndex++;
+                ValidationRulesEnum rule = ValidationRulesEnum.findByLineIndex(lineIndex);
+
+                if(rule.isValid(line)) {
+                    System.out.printf("Line %d (%s) is valid\n", lineIndex, rule.name());
+                    validLines++;
+                }
+                else {
+                    System.out.printf("Line %d (%s) is not valid\nLine content: %s", lineIndex, rule.name(), line);
+                }
+            }
+        }
+
+        return validLines == lineIndex;
+    }
+
+    private boolean isCalculationCorrect(InputStream contents) {
+
+        return false;
     }
 
     @Override
