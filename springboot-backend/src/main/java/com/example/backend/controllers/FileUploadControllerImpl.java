@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.example.backend.exceptions.StorageFileNotFoundException;
@@ -28,25 +29,20 @@ public class FileUploadControllerImpl implements FileUploadController{
     }
 
     @GetMapping("/")
-    public String listUploadedFiles(Model model) throws IOException {
-
-        model.addAttribute("files", storageService.loadAll().map(
-                        path -> MvcUriComponentsBuilder.fromMethodName(FileUploadController.class,
-                                "serveFile", path.getFileName().toString()).build().toUri().toString())
-                .collect(Collectors.toList()));
-
-        return "uploadForm";
+    public ResponseEntity<List<String>> listUploadedFiles() throws IOException {
+        List<String> fileUrls = storageService.loadAll()
+                .map(path -> MvcUriComponentsBuilder.fromMethodName(FileUploadControllerImpl.class,
+                        "serveFile", path.getFileName().toString()).build().toUri().toString())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok().body(fileUrls);
     }
 
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-
         Resource file = storageService.loadAsResource(filename);
-
         if (file == null)
             return ResponseEntity.notFound().build();
-
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }

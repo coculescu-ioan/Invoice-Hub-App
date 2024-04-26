@@ -1,7 +1,8 @@
 package com.example.backend;
 
-import com.example.backend.enums.Currency;
-import com.example.backend.enums.UserRole;
+import com.example.backend.enums.CurrencyEnum;
+import com.example.backend.enums.TypeEnum;
+import com.example.backend.enums.UserRoleEnum;
 import com.example.backend.models.*;
 import com.example.backend.repositories.*;
 import org.junit.jupiter.api.Assertions;
@@ -36,7 +37,7 @@ class BackendApplicationTests {
 	@Test
 	void testUserRepository() {
 
-		User user = new User("John Doe", "johndoe@domain.com", "pass1234", UserRole.USER);
+		User user = new User("John Doe", "johndoe@domain.com", "pass1234", UserRoleEnum.USER);
 		System.out.println(user);
 		userRepository.save(user);
 
@@ -55,9 +56,9 @@ class BackendApplicationTests {
 	@Test
 	void testFindAllUsers() {
 
-		userRepository.save(new User("Bob", "bobby@domain.com", "a", UserRole.ADMIN));
-		userRepository.save(new User("Charles", "charlie@example.com", "b", UserRole.USER));
-		userRepository.save(new User("Michael", "mickey@example.com", "c", UserRole.USER));
+		userRepository.save(new User("Bob", "bobby@domain.com", "a", UserRoleEnum.ADMIN));
+		userRepository.save(new User("Charles", "charlie@example.com", "b", UserRoleEnum.USER));
+		userRepository.save(new User("Michael", "mickey@example.com", "c", UserRoleEnum.USER));
 
 		List<User> users = userRepository.findAll();
 		for(var user : users) {
@@ -118,9 +119,9 @@ class BackendApplicationTests {
 	void testInvoiceRepository() {
 
 		Invoice invoice = new Invoice();
-		invoice.setType("Invoice");
+		invoice.setType(TypeEnum.INVOICE);
 		invoice.setDate(LocalDate.now());
-		invoice.setCurrency(Currency.USD);
+		invoice.setCurrency(CurrencyEnum.USD);
 		invoice.setTaxPercent(new BigDecimal("10.00"));
 		invoice.setClientName("Client Name");
 		invoice.setClientId("Client ID");

@@ -12,8 +12,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 
 public interface FileUploadController {
-    String listUploadedFiles(Model model) throws IOException;
-    ResponseEntity<Resource> serveFile(@PathVariable String filename);
+    ResponseEntity<?> listUploadedFiles() throws IOException;
+    ResponseEntity<?> serveFile(@PathVariable String filename);
     ResponseEntity<?> handleFileUpload(@RequestParam("file") MultipartFile file);
     ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc);
 }

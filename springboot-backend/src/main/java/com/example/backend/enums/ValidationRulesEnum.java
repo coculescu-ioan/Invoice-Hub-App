@@ -1,7 +1,9 @@
 package com.example.backend.enums;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 public enum ValidationRulesEnum {
 
@@ -18,7 +20,10 @@ public enum ValidationRulesEnum {
             if (line != null && line.startsWith("Type=")) {
                 String[] parts = line.split("=");
                 if (parts.length == 2) {
-                    return parts[1].equals("Invoice") || parts[1].equals("CreditNote");
+                    return Arrays.stream(TypeEnum.values())
+                            .map(Enum::name)
+                            .toList()
+                            .contains(parts[1]);
                 }
             }
             return false;
@@ -56,16 +61,10 @@ public enum ValidationRulesEnum {
             if (line != null && line.startsWith("Currency=")) {
                 String[] parts = line.split("=");
                 if (parts.length == 2) {
-                    return isValidCurrency(parts[1]);
-                }
-            }
-            return false;
-        }
-
-        private boolean isValidCurrency(String currency) {
-            for (Currency curr : Currency.values()) {
-                if (curr.name().equals(currency)) {
-                    return true;
+                    return Arrays.stream(CurrencyEnum.values())
+                            .map(Enum::name)
+                            .toList()
+                            .contains(parts[1]);
                 }
             }
             return false;
@@ -78,8 +77,8 @@ public enum ValidationRulesEnum {
             if (line != null && line.startsWith("TaxPercent=")) {
                 String[] parts = line.split("=");
                 if (parts.length == 2 && isNumeric(parts[1])) {
-                    double value = Double.parseDouble(parts[1]);
-                    return value > 0 && value < 100;
+                    BigDecimal value = new BigDecimal(parts[1]);
+                    return value.compareTo(BigDecimal.ZERO) > 0 && value.compareTo(BigDecimal.valueOf(100)) < 0;
                 }
             }
             return false;
@@ -189,10 +188,10 @@ public enum ValidationRulesEnum {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("Item=")) {
-                String[] parts = line.substring(5).split("/");
-                // name / quantity / unit_price
+                String[] parts = line.substring(5).split(",");
+                // name, quantity, unit_price
                 return parts.length == 3 && !parts[0].isEmpty()
-                        && isNumeric(parts[1]) && isNumeric(parts[2]) ;
+                        && isNumeric(parts[1]) && isNumeric(parts[2]);
             }
             return false;
         }

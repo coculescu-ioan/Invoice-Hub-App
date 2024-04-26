@@ -23,4 +23,10 @@ public class Item {
     private int quantity;
     private BigDecimal unitPrice;
 
+    public Item(long invoiceId, String name, int quantity, BigDecimal unitPrice) {
+        this.invoiceId = invoiceId;
+        this.name = name;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+    }
 }

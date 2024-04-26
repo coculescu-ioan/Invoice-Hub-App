@@ -4,7 +4,7 @@ import com.example.backend.dtos.requests.ChangePasswordRequest;
 import com.example.backend.dtos.requests.ForgetPasswordRequest;
 import com.example.backend.dtos.requests.LoginRequest;
 import com.example.backend.dtos.requests.SignupRequest;
-import com.example.backend.enums.UserRole;
+import com.example.backend.enums.UserRoleEnum;
 import com.example.backend.models.User;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
         user.setUsername(signupRequest.getUsername());
         user.setEmail(signupRequest.getEmail());
         user.setPassword(signupRequest.getPassword());
-        user.setRole(UserRole.USER);
+        user.setRole(UserRoleEnum.USER);
         userService.createUser(user);
 
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);

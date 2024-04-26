@@ -1,6 +1,7 @@
 package com.example.backend.models;
 
-import com.example.backend.enums.Currency;
+import com.example.backend.enums.CurrencyEnum;
+import com.example.backend.enums.TypeEnum;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -20,10 +21,11 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private TypeEnum type;
     private LocalDate date;
     @Enumerated(EnumType.STRING)
-    private Currency currency;
+    private CurrencyEnum currency;
     private BigDecimal taxPercent;
     private String clientName;
     private String clientId;
