@@ -1,14 +1,25 @@
 package com.example.backend.models;
 
 import com.example.backend.enums.Currency;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
+@Table(name="invoice")
+@Data
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Invoice {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     private String type;
     private LocalDate date;
     @Enumerated(EnumType.STRING)
@@ -23,5 +34,5 @@ public class Invoice {
     private BigDecimal taxExclusiveAmount;
     private BigDecimal taxAmount;
     private BigDecimal taxInclusiveAmount;
-    private List<Line> lines;
+
 }

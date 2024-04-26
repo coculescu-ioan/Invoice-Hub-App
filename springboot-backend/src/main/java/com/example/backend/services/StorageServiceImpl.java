@@ -11,8 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -55,57 +53,62 @@ public class StorageServiceImpl implements StorageService {
         this.rootLocation = Paths.get(properties.getLocation());
     }
 
-    @Override
-    public ResponseEntity<?> store(MultipartFile file) {
+   @Override
+   public ResponseEntity<?> store(MultipartFile file) {
         UploadSession session = new UploadSession();
-        // User Identification to be implemented after JWT
-        session.setUserId(1);
+        session.setUserId(1); // User Identification to be implemented after JWT
         session.setStartTime(LocalDateTime.now());
-        session.setStatus("In progress...");
+        session.setStatus("Pending");
         session = uploadSessionRepository.save(session);
+
         try {
             if (file.isEmpty()) {
-                session.setStatus("Failed");
-                session.setEndTime(LocalDateTime.now());
-                session = uploadSessionRepository.save(session);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Failed to store empty file.");
+                return handleUploadResponse(session, "Failed", "Cannot store empty file.",
+                        HttpStatus.BAD_REQUEST);
             }
+
             Path destinationFile = this.rootLocation.resolve(
                             Paths.get(Objects.requireNonNull(file.getOriginalFilename())))
                     .normalize().toAbsolutePath();
+
             if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
-                // This is a security check
-                session.setStatus("Failed");
-                session.setEndTime(LocalDateTime.now());
-                session = uploadSessionRepository.save(session);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Cannot store file outside current directory.");
+                return handleUploadResponse(session, "Failed",
+                        "Cannot store file outside current directory.",
+                        HttpStatus.BAD_REQUEST);
             }
+
             try (var inputStream = file.getInputStream()) {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            if(isStructureValid(file.getInputStream())) {
-                session.setStatus("Success");
-            }
-            else {
-                session.setStatus("Failed");
+            if (isStructureValid(file.getInputStream())) {
+                if (areCalculationsCorrect(file.getInputStream())) {
+
+                    storeFileReport(file, session);
+                    return handleUploadResponse(session, "Success",
+                            "File successfully uploaded: " + file.getOriginalFilename(),
+                            HttpStatus.OK);
+                } else {
+                    return handleUploadResponse(session, "Failed", "Please review calculations.",
+                            HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                return handleUploadResponse(session, "Failed", "Invalid file structure.",
+                        HttpStatus.BAD_REQUEST);
             }
 
-            session.setEndTime(LocalDateTime.now());
-            storeFileReport(file, session);
-
-            uploadSessionRepository.save(session);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("File successfully uploaded: " + file.getOriginalFilename());
         } catch (IOException e) {
-            session.setStatus("Failed");
-            session.setEndTime(LocalDateTime.now());
-            uploadSessionRepository.save(session);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to store file: " + e.getMessage());
+            return handleUploadResponse(session, "Failed", "Unable to store file: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private ResponseEntity<?> handleUploadResponse(UploadSession session, String status,
+                                                   String message, HttpStatus httpStatus) {
+        session.setStatus(status);
+        session.setEndTime(LocalDateTime.now());
+        uploadSessionRepository.save(session);
+        return ResponseEntity.status(httpStatus).body(message);
     }
 
     private void storeFileReport(MultipartFile file, UploadSession session) {
@@ -120,6 +123,7 @@ public class StorageServiceImpl implements StorageService {
         fileReportRepository.save(fileReport);
     }
 
+    // Function to check matching the structure of Invoice/CreditNote
     private static boolean isStructureValid(InputStream contents) throws IOException {
         int lineIndex = 0;
         int validLines = 0;
@@ -143,10 +147,48 @@ public class StorageServiceImpl implements StorageService {
         return validLines == lineIndex;
     }
 
-    private boolean isCalculationCorrect(InputStream contents) {
+    private boolean areCalculationsCorrect(InputStream contents) throws IOException {
+        double taxExclusiveAmount = 0;
+        double taxAmount = 0;
+        double taxInclusiveAmount = 0;
+        double taxPercent = 0;
 
-        return false;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(contents))) {
+            String line;
+            int lineIndex = 0;
+            double totalValue = 0;
+
+            while ((line = reader.readLine()) != null) {
+                ValidationRulesEnum rule = ValidationRulesEnum.findByLineIndex(++lineIndex);
+
+                if (rule == ValidationRulesEnum.TAX_EXCLUSIVE_AMOUNT) {
+                    String[] parts = line.split("=");
+                    taxExclusiveAmount = Double.parseDouble(parts[1]);
+                } else if (rule == ValidationRulesEnum.TAX_AMOUNT) {
+                    String[] parts = line.split("=");
+                    taxAmount = Double.parseDouble(parts[1]);
+                } else if (rule == ValidationRulesEnum.TAX_INCLUSIVE_AMOUNT) {
+                    String[] parts = line.split("=");
+                    taxInclusiveAmount = Double.parseDouble(parts[1]);
+                } else if (rule == ValidationRulesEnum.TAX_PERCENT) {
+                    String[] parts = line.split("=");
+                    taxPercent = Double.parseDouble(parts[1]);
+                } else if (rule == ValidationRulesEnum.ITEM) {
+                    String[] parts = line.substring(5).split("/");
+                    int quantity = Integer.parseInt(parts[1]);
+                    double unitPrice = Double.parseDouble(parts[2]);
+                    totalValue += quantity * unitPrice;
+                }
+            }
+        }
+
+        double expectedTaxAmount = (taxPercent / 100) * taxExclusiveAmount;
+        double expectedTaxExclusiveAmount = taxExclusiveAmount + expectedTaxAmount;
+
+        return Math.abs(taxAmount - expectedTaxAmount) < 0.01
+                && Math.abs(expectedTaxExclusiveAmount - taxInclusiveAmount) < 0.01;
     }
+
 
     @Override
     public Stream<Path> loadAll() {
