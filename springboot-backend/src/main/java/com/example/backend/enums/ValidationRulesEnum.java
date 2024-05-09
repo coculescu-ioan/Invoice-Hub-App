@@ -1,5 +1,7 @@
 package com.example.backend.enums;
 
+import lombok.Getter;
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -7,14 +9,15 @@ import java.util.Arrays;
 
 public enum ValidationRulesEnum {
 
-    DEFAULT {
+    DEFAULT("Error: The input line cannot be null.") {
         @Override
         public boolean isValid(String line) {
             return (line != null);
         }
     },
 
-    TYPE(1) {
+    TYPE(1, "Error: The input line must start with 'Type=' and " +
+            "the value after '=' must match one of the predefined type enumerations.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("Type=")) {
@@ -30,7 +33,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    DATE(2) {
+    DATE(2, "Error: The input line must start with 'Date=' and " +
+            "the date format must be 'yyyy-MM-dd' with valid month and day values.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("Date=")) {
@@ -55,7 +59,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    CURRENCY(3) {
+    CURRENCY(3, "Error: The input line must start with 'Currency=' and " +
+            "the value after '=' must match one of the predefined currency enumerations.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("Currency=")) {
@@ -71,7 +76,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    TAX_PERCENT(4) {
+    TAX_PERCENT(4, "Error: The input line must start with 'TaxPercent=' and " +
+            "the value must be a numeric percentage between 0 and 100, exclusive.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("TaxPercent=")) {
@@ -85,7 +91,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    CLIENT_NAME(5) {
+    CLIENT_NAME(5, "Error: The input line must start with 'ClientName=' and " +
+            "the name following '=' cannot be empty.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("ClientName=")) {
@@ -96,7 +103,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    CLIENT_ID(6) {
+    CLIENT_ID(6, "Error: The input line must start with 'ClientID=' and " +
+            "the ID following '=' must be exactly 8 characters long.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("ClientID=")) {
@@ -107,7 +115,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    CLIENT_ADDRESS(7) {
+    CLIENT_ADDRESS(7, "Error: The input line must start with 'ClientAddress=' and " +
+            "the address following '=' cannot be empty.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("ClientAddress=")) {
@@ -118,7 +127,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    SUPPLIER_NAME(8) {
+    SUPPLIER_NAME(8, "Error: The input line must start with 'SupplierName=' and " +
+            "the name following '=' cannot be empty.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("SupplierName=")) {
@@ -129,7 +139,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    SUPPLIER_ID(9) {
+    SUPPLIER_ID(9, "Error: The input line must start with 'SupplierID=' and " +
+            "the ID following '=' must be exactly 8 characters long.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("SupplierID=")) {
@@ -140,7 +151,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    SUPPLIER_ADDRESS(10) {
+    SUPPLIER_ADDRESS(10, "Error: The input line must start with 'SupplierAddress=' and " +
+            "the address following '=' cannot be empty.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("SupplierAddress=")) {
@@ -151,7 +163,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    TAX_EXCLUSIVE_AMOUNT(11) {
+    TAX_EXCLUSIVE_AMOUNT(11, "Error: The input line must start with 'TaxExclusiveAmount=' and " +
+            "the value after '=' must be a valid numeric amount.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("TaxExclusiveAmount=")) {
@@ -162,7 +175,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    TAX_AMOUNT(12) {
+    TAX_AMOUNT(12, "Error: The input line must start with 'TaxAmount=' and " +
+            "the value after '=' must be a valid numeric amount.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("TaxAmount=")) {
@@ -173,7 +187,8 @@ public enum ValidationRulesEnum {
         }
     },
 
-    TAX_INCLUSIVE_AMOUNT(13) {
+    TAX_INCLUSIVE_AMOUNT(13, "Error: The input line must start with 'TaxInclusiveAmount=' and " +
+            "the value after '=' must be a valid numeric amount.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("TaxInclusiveAmount=")) {
@@ -184,12 +199,12 @@ public enum ValidationRulesEnum {
         }
     },
 
-    ITEM {
+    ITEM("Error: The input line must start with 'Item=' and follow the format 'Item=name,quantity,unit_price' " +
+            "with non-empty name and numeric quantity and unit price.") {
         @Override
         public boolean isValid(String line) {
             if (line != null && line.startsWith("Item=")) {
                 String[] parts = line.substring(5).split(",");
-                // name, quantity, unit_price
                 return parts.length == 3 && !parts[0].isEmpty()
                         && isNumeric(parts[1]) && isNumeric(parts[2]);
             }
@@ -202,11 +217,16 @@ public enum ValidationRulesEnum {
     }
 
     private Integer lineIndex;
+    @Getter
+    private final String errorMessage;
 
-    ValidationRulesEnum() { }
-
-    ValidationRulesEnum(Integer lineIndex) {
+    ValidationRulesEnum(Integer lineIndex, String errorMessage) {
         this.lineIndex = lineIndex;
+        this.errorMessage = errorMessage;
+    }
+
+    ValidationRulesEnum(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public abstract boolean isValid(String line);

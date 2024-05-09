@@ -54,7 +54,9 @@ public class StorageServiceImpl implements StorageService {
     @Autowired
     public StorageServiceImpl(StorageProperties properties,
                               FileReportRepository fileReportRepository,
-                              UploadSessionRepository uploadSessionRepository, InvoiceRepository invoiceRepository, ItemRepository itemRepository) {
+                              UploadSessionRepository uploadSessionRepository,
+                              InvoiceRepository invoiceRepository,
+                              ItemRepository itemRepository) {
 
         this.fileReportRepository = fileReportRepository;
         this.uploadSessionRepository = uploadSessionRepository;
@@ -68,10 +70,11 @@ public class StorageServiceImpl implements StorageService {
         this.rootLocation = Paths.get(properties.getLocation());
     }
 
-   @Override
-   public ResponseEntity<?> store(MultipartFile file) {
+    @Override
+    public ResponseEntity<?> store(MultipartFile file) {
         UploadSession session = new UploadSession();
-        session.setUserId(1); // User Identification to be implemented after JWT
+        // User Identification to be implemented after JWT
+        session.setUserId(1);
         session.setStartTime(LocalDateTime.now());
         session.setStatus("Pending");
         session = uploadSessionRepository.save(session);
@@ -98,10 +101,12 @@ public class StorageServiceImpl implements StorageService {
 
             session.setEndTime(LocalDateTime.now());
             storeFileReport(file, session);
-            List<String> lines = new ArrayList<>();
 
-            if (isStructureValid(file.getInputStream(), lines)) {
-                if (areCalculationsCorrect(file.getInputStream())) {
+            List<String> lines = new ArrayList<>();
+            List<String> errors = new ArrayList<>();
+
+            if (isStructureValid(file.getInputStream(), lines, errors)) {
+                if (areCalculationsCorrect(file.getInputStream(), errors)) {
 
                     Invoice invoice = buildInvoice(lines);
                     invoice = invoiceRepository.save(invoice);
@@ -119,17 +124,70 @@ public class StorageServiceImpl implements StorageService {
                             "File successfully uploaded: " + file.getOriginalFilename(),
                             HttpStatus.OK);
                 } else {
-                    return handleUploadResponse(session, "Failed", "Please review calculations.",
+                    String body = "Please review calculations:\n" + String.join("\n", errors);
+                    return handleUploadResponse(session, "Failed", body,
                             HttpStatus.BAD_REQUEST);
                 }
             } else {
-                return handleUploadResponse(session, "Failed", "Invalid file structure.",
+                String body = "Invalid file structure:\n" + String.join("\n", errors);
+                return handleUploadResponse(session, "Failed", body,
                         HttpStatus.BAD_REQUEST);
             }
 
         } catch (IOException e) {
             return handleUploadResponse(session, "Failed", "Unable to store file: " + e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public Stream<Path> loadAll() {
+        try {
+            return Files.walk(this.rootLocation, 1)
+                    .filter(path -> !path.equals(this.rootLocation))
+                    .filter(Files::isRegularFile)
+                    .map(this.rootLocation::relativize);
+        } catch (IOException e) {
+            throw new StorageException("Failed to read stored files", e);
+        }
+    }
+
+    @Override
+    public Path load(String filename) {
+        return rootLocation.resolve(filename);
+    }
+
+    @Override
+    public Resource loadAsResource(String filename) {
+        try {
+            Path file = load(filename);
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            }
+            else {
+                throw new StorageFileNotFoundException(
+                        "Could not read file: " + filename);
+
+            }
+        }
+        catch (MalformedURLException e) {
+            throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+        }
+    }
+
+    @Override
+    public void deleteAll() {
+        FileSystemUtils.deleteRecursively(rootLocation.toFile());
+    }
+
+    @Override
+    public void init() {
+        try {
+            Files.createDirectories(rootLocation);
+        }
+        catch (IOException e) {
+            throw new StorageException("Could not initialize storage", e);
         }
     }
 
@@ -175,11 +233,11 @@ public class StorageServiceImpl implements StorageService {
         return invoice;
     }
 
-    // Function to check matching the structure of Invoice/CreditNote
-    private static boolean isStructureValid(InputStream contents, List<String> lines) throws IOException {
+    private static boolean isStructureValid(InputStream contents, List<String> lines, List<String> errors) throws IOException {
         int lineIndex = 0;
         int validLines = 0;
         int itemCounter = 0;
+
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(contents))) {
             String line;
             while((line = reader.readLine()) != null) {
@@ -194,18 +252,18 @@ public class StorageServiceImpl implements StorageService {
                     }
                 }
                 else {
-                    System.out.printf("<!> Line %d (%s) is NOT valid\n\tLine content: %s\n", lineIndex, rule.name(), line);
+                    errors.add(rule.getErrorMessage());
                 }
             }
             if(itemCounter == 0) {
-                System.out.println("<!> NO valid items found");
+                errors.add("NO valid items found");
             }
         }
 
         return validLines == lineIndex && itemCounter > 0;
     }
 
-    private boolean areCalculationsCorrect(InputStream contents) throws IOException {
+    private boolean areCalculationsCorrect(InputStream contents, List<String> errors) throws IOException {
         BigDecimal taxExclusiveAmount = BigDecimal.ZERO;
         BigDecimal taxAmount = BigDecimal.ZERO;
         BigDecimal taxInclusiveAmount = BigDecimal.ZERO;
@@ -244,69 +302,18 @@ public class StorageServiceImpl implements StorageService {
             }
         }
 
-        System.out.printf("TaxPercent: %f TotalValue: %f\n", taxPercent, totalValue);
+        errors.add(String.format("TaxPercent: %.3f TotalValue: %.3f", taxPercent, totalValue));
+
         BigDecimal taxRatio = taxPercent.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP);
-        System.out.println("Tax Ratio: " + taxRatio);
+        errors.add(String.format("Tax Ratio: %.3f", taxRatio));
+
         BigDecimal expectedTaxAmount = taxRatio.multiply(totalValue);
-
         BigDecimal expectedTaxInclusiveAmount = taxExclusiveAmount.add(expectedTaxAmount);
+        errors.add(String.format("ExpectedTaxAmount: %.3f Found: %.3f", expectedTaxAmount, taxAmount));
+        errors.add(String.format("ExpectedTaxInclusiveAmount: %.3f Found: %.3f", expectedTaxInclusiveAmount, taxInclusiveAmount));
 
-        System.out.printf("ExpectedTaxAmount: %f Found: %f\n", expectedTaxAmount, taxAmount);
-        System.out.printf("ExpectedTaxInclusiveAmount: %f Found: %f\n", expectedTaxInclusiveAmount, taxInclusiveAmount);
         return taxAmount.compareTo(expectedTaxAmount) == 0
                 && taxInclusiveAmount.compareTo(expectedTaxInclusiveAmount) == 0;
 
-    }
-
-    @Override
-    public Stream<Path> loadAll() {
-        try {
-            return Files.walk(this.rootLocation, 1)
-                    .filter(path -> !path.equals(this.rootLocation))
-                    .filter(Files::isRegularFile)
-                    .map(this.rootLocation::relativize);
-        } catch (IOException e) {
-            throw new StorageException("Failed to read stored files", e);
-        }
-    }
-
-
-    @Override
-    public Path load(String filename) {
-        return rootLocation.resolve(filename);
-    }
-
-    @Override
-    public Resource loadAsResource(String filename) {
-        try {
-            Path file = load(filename);
-            Resource resource = new UrlResource(file.toUri());
-            if (resource.exists() || resource.isReadable()) {
-                return resource;
-            }
-            else {
-                throw new StorageFileNotFoundException(
-                        "Could not read file: " + filename);
-
-            }
-        }
-        catch (MalformedURLException e) {
-            throw new StorageFileNotFoundException("Could not read file: " + filename, e);
-        }
-    }
-
-    @Override
-    public void deleteAll() {
-        FileSystemUtils.deleteRecursively(rootLocation.toFile());
-    }
-
-    @Override
-    public void init() {
-        try {
-            Files.createDirectories(rootLocation);
-        }
-        catch (IOException e) {
-            throw new StorageException("Could not initialize storage", e);
-        }
     }
 }
