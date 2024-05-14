@@ -1,5 +1,6 @@
 package com.example.backend.models;
 
+import com.example.backend.enums.StatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-//@AllArgsConstructor
 public class UploadSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +19,10 @@ public class UploadSession {
     private long userId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private StatusEnum status;
 
-    public UploadSession(long userId, LocalDateTime startTime, LocalDateTime endTime, String status) {
+    public UploadSession(long userId, LocalDateTime startTime, LocalDateTime endTime, StatusEnum status) {
         this.userId = userId;
         this.startTime = startTime;
         this.endTime = endTime;

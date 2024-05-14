@@ -1,5 +1,6 @@
 package com.example.backend.models;
 
+import com.example.backend.enums.StatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,6 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-//@AllArgsConstructor
 public class FileReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +22,12 @@ public class FileReport {
     private String filetype;
     private LocalDate dateUploaded;
     private long size;
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private StatusEnum status;
 
     public FileReport(long userId, long uploadSessionId,
                       String filename, String filetype,
-                      LocalDate dateUploaded, long size, String status) {
+                      LocalDate dateUploaded, long size, StatusEnum status) {
         this.userId = userId;
         this.uploadSessionId = uploadSessionId;
         this.filename = filename;

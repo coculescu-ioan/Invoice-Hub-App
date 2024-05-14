@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.example.backend.enums.CurrencyEnum;
+import com.example.backend.enums.StatusEnum;
 import com.example.backend.enums.TypeEnum;
 import com.example.backend.enums.ValidationRulesEnum;
 import com.example.backend.exceptions.StorageException;
@@ -76,12 +77,24 @@ public class StorageServiceImpl implements StorageService {
         // User Identification to be implemented after JWT
         session.setUserId(1);
         session.setStartTime(LocalDateTime.now());
-        session.setStatus("Pending");
+        session.setStatus(StatusEnum.PENDING);
         session = uploadSessionRepository.save(session);
+
+        FileReport fileReport = new FileReport();
+        fileReport.setUploadSessionId(session.getId());
+        fileReport.setUserId(session.getUserId());
+
+        fileReport.setFilename(file.getOriginalFilename());
+        fileReport.setFiletype(file.getContentType());
+        fileReport.setSize(file.getSize());
+
+        fileReport.setDateUploaded(LocalDate.now());
 
         try {
             if (file.isEmpty()) {
-                return handleUploadResponse(session, "Failed", "Cannot store empty file.",
+                fileReport.setStatus(StatusEnum.FAILED);
+                fileReportRepository.save(fileReport);
+                return handleUploadResponse(session, StatusEnum.FAILED, "Cannot store empty file.",
                         HttpStatus.BAD_REQUEST);
             }
 
@@ -90,7 +103,9 @@ public class StorageServiceImpl implements StorageService {
                     .normalize().toAbsolutePath();
 
             if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
-                return handleUploadResponse(session, "Failed",
+                fileReport.setStatus(StatusEnum.FAILED);
+                fileReportRepository.save(fileReport);
+                return handleUploadResponse(session, StatusEnum.FAILED,
                         "Cannot store file outside current directory.",
                         HttpStatus.BAD_REQUEST);
             }
@@ -99,8 +114,8 @@ public class StorageServiceImpl implements StorageService {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            session.setEndTime(LocalDateTime.now());
-            storeFileReport(file, session);
+            fileReport.setStatus(StatusEnum.SUCCESS);
+            fileReportRepository.save(fileReport);
 
             List<String> lines = new ArrayList<>();
             List<String> errors = new ArrayList<>();
@@ -120,22 +135,24 @@ public class StorageServiceImpl implements StorageService {
                         ));
                     }
 
-                    return handleUploadResponse(session, "Success",
+                    return handleUploadResponse(session, StatusEnum.SUCCESS,
                             "File successfully uploaded: " + file.getOriginalFilename(),
                             HttpStatus.OK);
                 } else {
                     String body = "Please review calculations:\n" + String.join("\n", errors);
-                    return handleUploadResponse(session, "Failed", body,
+                    return handleUploadResponse(session, StatusEnum.FAILED, body,
                             HttpStatus.BAD_REQUEST);
                 }
             } else {
                 String body = "Invalid file structure:\n" + String.join("\n", errors);
-                return handleUploadResponse(session, "Failed", body,
+                return handleUploadResponse(session, StatusEnum.FAILED, body,
                         HttpStatus.BAD_REQUEST);
             }
 
         } catch (IOException e) {
-            return handleUploadResponse(session, "Failed", "Unable to store file: " + e.getMessage(),
+            fileReport.setStatus(StatusEnum.FAILED);
+            fileReportRepository.save(fileReport);
+            return handleUploadResponse(session, StatusEnum.FAILED, "Unable to store file: " + e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -191,24 +208,12 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
-    private ResponseEntity<?> handleUploadResponse(UploadSession session, String status,
+    private ResponseEntity<?> handleUploadResponse(UploadSession session, StatusEnum status,
                                                    String message, HttpStatus httpStatus) {
         session.setStatus(status);
         session.setEndTime(LocalDateTime.now());
         uploadSessionRepository.save(session);
         return ResponseEntity.status(httpStatus).body(message);
-    }
-
-    private void storeFileReport(MultipartFile file, UploadSession session) {
-        FileReport fileReport = new FileReport();
-        fileReport.setUploadSessionId(session.getId());
-        fileReport.setUserId(session.getUserId());
-        fileReport.setFilename(file.getOriginalFilename());
-        fileReport.setFiletype(file.getContentType());
-        fileReport.setSize(file.getSize());
-        fileReport.setDateUploaded(session.getEndTime().toLocalDate());
-        fileReport.setStatus(session.getStatus());
-        fileReportRepository.save(fileReport);
     }
 
     private static Invoice buildInvoice(List<String> lines) {

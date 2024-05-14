@@ -6,10 +6,17 @@ import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig implements WebSecurityConfigurer<WebSecurity> {
+// WebSecurityConfigurerAdapter : deprecated approach
+public class WebSecurityConfig /*extends WebSecurityConfigurerAdapter*/ implements WebSecurityConfigurer<WebSecurity> {
+
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Override
     public void init(WebSecurity builder) throws Exception {

@@ -3,13 +3,16 @@ package com.example.backend.services;
 import com.example.backend.models.User;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -64,5 +67,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        //TO-DO
+        return null;
     }
 }
