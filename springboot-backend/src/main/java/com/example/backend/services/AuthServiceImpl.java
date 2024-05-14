@@ -7,9 +7,11 @@ import com.example.backend.dtos.requests.SignupRequest;
 import com.example.backend.enums.UserRoleEnum;
 import com.example.backend.models.User;
 import com.example.backend.repositories.UserRepository;
+import com.example.backend.utilities.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -22,6 +24,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JWTUtils jwtUtils;
 
     @Override
     public ResponseEntity<?> registerUser(SignupRequest signupRequest) {
@@ -36,7 +41,9 @@ public class AuthServiceImpl implements AuthService {
         User user = new User();
         user.setUsername(signupRequest.getUsername());
         user.setEmail(signupRequest.getEmail());
-        user.setPassword(signupRequest.getPassword());
+
+        user.setPassword(new BCryptPasswordEncoder().encode(signupRequest.getPassword()));
+
         user.setRole(UserRoleEnum.USER);
         userService.createUser(user);
 
@@ -48,23 +55,24 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElse(null);
 
-        // Avoiding null pointer exception : Objects.equals()
-        if (user == null || !Objects.equals(user.getPassword(), loginRequest.getPassword())) {
+        if (user == null || ! new BCryptPasswordEncoder().matches(user.getPassword(), loginRequest.getPassword())) {
             return new ResponseEntity<>("Invalid username/email or password!", HttpStatus.UNAUTHORIZED);
         }
 
-        return new ResponseEntity<>("User authenticated successfully", HttpStatus.OK);
+        String token = jwtUtils.generateToken(user.getUsername());
+
+        return ResponseEntity.ok().header("Authorization", "Bearer " + token).body("User authenticated successfully");
     }
 
     @Override
     public ResponseEntity<?> changePassword(ChangePasswordRequest changePasswordRequest) {
         User user = userRepository.findByUsername(changePasswordRequest.getUsername()).orElse(null);
 
-        if (user == null || !Objects.equals(user.getPassword(), changePasswordRequest.getCurrentPassword())) {
+        if (user == null || ! new BCryptPasswordEncoder().matches(user.getPassword(), changePasswordRequest.getCurrentPassword())) {
             return new ResponseEntity<>("Invalid username/email or current password!", HttpStatus.UNAUTHORIZED);
         }
 
-        user.setPassword(changePasswordRequest.getNewPassword());
+        user.setPassword(new BCryptPasswordEncoder().encode(changePasswordRequest.getNewPassword()));
         userRepository.save(user);
 
         return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);

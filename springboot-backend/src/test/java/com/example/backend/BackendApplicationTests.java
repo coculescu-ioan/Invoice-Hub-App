@@ -1,6 +1,7 @@
 package com.example.backend;
 
 import com.example.backend.enums.CurrencyEnum;
+import com.example.backend.enums.StatusEnum;
 import com.example.backend.enums.TypeEnum;
 import com.example.backend.enums.UserRoleEnum;
 import com.example.backend.models.*;
@@ -73,7 +74,7 @@ class BackendApplicationTests {
 	@Test
 	void testUploadSessionRepository() {
 		UploadSession uploadSession = new UploadSession(1, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-				LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).plusHours(1), "completed");
+				LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).plusHours(1), StatusEnum.SUCCESS);
 		System.out.println(uploadSession);
 		uploadSessionRepository.save(uploadSession);
 
@@ -95,7 +96,7 @@ class BackendApplicationTests {
 	@Test
 	void testFileReportRepository() {
 
-		FileReport fileReport = new FileReport(1, 1, "file.txt", "text/plain", LocalDate.now(), 1000, "uploaded");
+		FileReport fileReport = new FileReport(1, 1, "file.txt", "text/plain", LocalDate.now(), 1000, StatusEnum.SUCCESS);
 		System.out.println(fileReport);
 		fileReportRepository.save(fileReport);
 
