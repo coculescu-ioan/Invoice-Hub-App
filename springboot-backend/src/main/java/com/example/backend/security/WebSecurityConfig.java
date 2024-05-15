@@ -3,8 +3,6 @@ package com.example.backend.security;
 
 import com.example.backend.security.filters.JWTAuthenticationFilter;
 import com.example.backend.security.filters.JWTAuthorizationFilter;
-import com.example.backend.services.UserService;
-import com.example.backend.services.UserServiceImpl;
 import com.example.backend.utilities.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,14 +28,13 @@ public class WebSecurityConfig {
     private UserDetailsService userDetailsService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests.requestMatchers("/api/auth/**")
-                        .permitAll()
-                        .anyRequest().authenticated())
+                        .permitAll().requestMatchers("/api/upload/**").authenticated().anyRequest().authenticated())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JWTAuthenticationFilter(jwtUtils, authenticationManager(http)), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JWTAuthorizationFilter(jwtUtils, authenticationManager(http)), UsernamePasswordAuthenticationFilter.class);
+                .addFilter(new JWTAuthenticationFilter(jwtUtils, authenticationManager))
+                .addFilter(new JWTAuthorizationFilter(jwtUtils, authenticationManager, userDetailsService));
         return http.build();
     }
 
@@ -53,13 +49,5 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Override
-//    public void init(WebSecurity builder) throws Exception {
-//
-//    }
-//
-//    @Override
-//    public void configure(WebSecurity web) throws Exception {
-//        web.ignoring().requestMatchers("/**");
-//    }
+
 }

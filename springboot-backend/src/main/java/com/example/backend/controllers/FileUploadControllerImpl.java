@@ -44,7 +44,7 @@ public class FileUploadControllerImpl implements FileUploadController{
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
-    @PostMapping("/")
+    @PostMapping("/file")
     public ResponseEntity<?> handleFileUpload(@RequestParam("file") MultipartFile file) {
         return storageService.store(file);
     }

@@ -136,7 +136,7 @@ public class StorageServiceImpl implements StorageService {
                     }
 
                     return handleUploadResponse(session, StatusEnum.SUCCESS,
-                            "File successfully uploaded: " + file.getOriginalFilename(),
+                            "Invoice successfully validated: " + file.getOriginalFilename(),
                             HttpStatus.OK);
                 } else {
                     String body = "Please review calculations:\n" + String.join("\n", errors);
