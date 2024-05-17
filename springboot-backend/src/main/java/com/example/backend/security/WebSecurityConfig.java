@@ -1,6 +1,7 @@
 package com.example.backend.security;
 
 
+import com.example.backend.enums.UserRoleEnum;
 import com.example.backend.security.filters.JWTAuthenticationFilter;
 import com.example.backend.security.filters.JWTAuthorizationFilter;
 import com.example.backend.utilities.JWTUtils;
@@ -16,7 +17,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class WebSecurityConfig {
@@ -30,8 +30,10 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests.requestMatchers("/api/auth/**")
-                        .permitAll().requestMatchers("/api/upload/**").authenticated().anyRequest().authenticated())
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/file/**").authenticated()
+                        .anyRequest().authenticated())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(new JWTAuthenticationFilter(jwtUtils, authenticationManager))
                 .addFilter(new JWTAuthorizationFilter(jwtUtils, authenticationManager, userDetailsService));

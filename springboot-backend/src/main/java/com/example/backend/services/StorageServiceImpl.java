@@ -17,28 +17,21 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.Optional;
 
-import com.example.backend.enums.CurrencyEnum;
-import com.example.backend.enums.StatusEnum;
-import com.example.backend.enums.TypeEnum;
-import com.example.backend.enums.ValidationRulesEnum;
+import com.example.backend.enums.*;
 import com.example.backend.exceptions.StorageException;
 import com.example.backend.exceptions.StorageFileNotFoundException;
-import com.example.backend.models.FileReport;
-import com.example.backend.models.Invoice;
-import com.example.backend.models.Item;
-import com.example.backend.models.UploadSession;
+import com.example.backend.models.*;
 import com.example.backend.properties.StorageProperties;
-import com.example.backend.repositories.FileReportRepository;
-import com.example.backend.repositories.InvoiceRepository;
-import com.example.backend.repositories.ItemRepository;
-import com.example.backend.repositories.UploadSessionRepository;
+import com.example.backend.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,18 +44,20 @@ public class StorageServiceImpl implements StorageService {
     private final UploadSessionRepository uploadSessionRepository;
     private final InvoiceRepository invoiceRepository;
     private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public StorageServiceImpl(StorageProperties properties,
                               FileReportRepository fileReportRepository,
                               UploadSessionRepository uploadSessionRepository,
                               InvoiceRepository invoiceRepository,
-                              ItemRepository itemRepository) {
+                              ItemRepository itemRepository, UserRepository userRepository) {
 
         this.fileReportRepository = fileReportRepository;
         this.uploadSessionRepository = uploadSessionRepository;
         this.invoiceRepository = invoiceRepository;
         this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
 
         if(properties.getLocation().trim().isEmpty()){
             throw new StorageException("File upload location can not be Empty.");
@@ -73,9 +68,18 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public ResponseEntity<?> store(MultipartFile file) {
+        // Extract username from current session
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+        User user = optionalUser.get();
+        long userId = user.getId();
+
         UploadSession session = new UploadSession();
-        // User Identification to be implemented after JWT
-        session.setUserId(1);
+        session.setUserId(userId);
         session.setStartTime(LocalDateTime.now());
         session.setStatus(StatusEnum.PENDING);
         session = uploadSessionRepository.save(session);
@@ -158,14 +162,17 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public Stream<Path> loadAll() {
-        try {
-            return Files.walk(this.rootLocation, 1)
-                    .filter(path -> !path.equals(this.rootLocation))
-                    .filter(Files::isRegularFile)
-                    .map(this.rootLocation::relativize);
-        } catch (IOException e) {
-            throw new StorageException("Failed to read stored files", e);
+    public List<FileReport> loadAll() {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return Objects.equals(user.getRole(), UserRoleEnum.ADMIN) ?
+                    fileReportRepository.findAll() :
+                    fileReportRepository.findAllByUserId(user.getId());
+        }
+        else {
+            throw new UsernameNotFoundException("User with username " + username + " not found.");
         }
     }
 
@@ -196,6 +203,21 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void deleteAll() {
         FileSystemUtils.deleteRecursively(rootLocation.toFile());
+    }
+
+    @Override
+    public List<UploadSession> loadAllUploadSessions() {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return Objects.equals(user.getRole(), UserRoleEnum.ADMIN) ?
+                    uploadSessionRepository.findAll() :
+                    uploadSessionRepository.findAllByUserId(user.getId());
+        }
+        else {
+            throw new UsernameNotFoundException("User with username " + username + " not found.");
+        }
     }
 
     @Override
