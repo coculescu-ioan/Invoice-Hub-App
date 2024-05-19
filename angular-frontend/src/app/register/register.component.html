@@ -1,20 +1,17 @@
-<div>
-    <h2>Register</h2>
-    <form (ngSubmit)="register()">
-      <div>
-        <label for="username">Username</label>
-        <input id="username" [(ngModel)]="signupRequest.username" name="username" required>
-      </div>
-      <div>
-        <label for="email">Email</label>
-        <input id="email" type="email" [(ngModel)]="signupRequest.email" name="email" required>
-      </div>
-      <div>
-        <label for="password">Password</label>
-        <input id="password" type="password" [(ngModel)]="signupRequest.password" name="password" required>
-      </div>
-      <button type="submit">Register</button>
+<div class="register-container">
+    <h2>Create Account</h2>
+    <form class="register-form" (ngSubmit)="register()">
+        <div class="form-group">
+            <input id="username" type="text" placeholder="Username" [(ngModel)]="signupRequest.username" name="username" required>
+        </div>
+        <div class="form-group">
+            <input id="email" type="email" placeholder="Email" [(ngModel)]="signupRequest.email" name="email" required>
+        </div>
+        <div class="form-group">
+            <input id="password" type="password" placeholder="Password" [(ngModel)]="signupRequest.password" name="password" required>
+        </div>
+        <button type="submit">Register</button>
     </form>
-    <div *ngIf="errorMessage">{{ errorMessage }}</div>
-</div>
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  </div>
   
