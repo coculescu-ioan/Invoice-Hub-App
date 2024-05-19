@@ -3,7 +3,9 @@ package com.example.backend.controllers;
 import java.io.IOException;
 
 import com.example.backend.exceptions.StorageFileNotFoundException;
+import com.example.backend.services.InvoiceService;
 import com.example.backend.services.StorageService;
+import com.example.backend.services.UploadSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -16,10 +18,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/file")
 public class FileControllerImpl implements FileController {
     private final StorageService storageService;
+    private final InvoiceService invoiceService;
+    private final UploadSessionService uploadSessionService;
 
     @Autowired
-    public FileControllerImpl(StorageService storageService) {
+    public FileControllerImpl(StorageService storageService, InvoiceService invoiceService, UploadSessionService uploadSessionService) {
         this.storageService = storageService;
+        this.invoiceService = invoiceService;
+        this.uploadSessionService = uploadSessionService;
     }
 
     @ExceptionHandler(StorageFileNotFoundException.class)
@@ -52,7 +58,13 @@ public class FileControllerImpl implements FileController {
     // frontend: SessionsComponent
     @GetMapping("/uploadSessions")
     public ResponseEntity<?> getSessions() {
-        return ResponseEntity.ok(storageService.loadAllUploadSessions());
+        return ResponseEntity.ok(uploadSessionService.loadAll());
+    }
+
+    // frontend: InvoicesComponent
+    @GetMapping("/invoices")
+    public ResponseEntity<?> getInvoices() {
+        return ResponseEntity.ok(invoiceService.loadAll());
     }
 
 }

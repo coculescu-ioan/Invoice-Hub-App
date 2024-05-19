@@ -2,7 +2,6 @@ package com.example.backend.services;
 
 
 import com.example.backend.models.FileReport;
-import com.example.backend.models.UploadSession;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +21,5 @@ public interface StorageService {
     Resource loadAsResource(String filename);
 
     void deleteAll();
-
-    List<UploadSession> loadAllUploadSessions();
 
 }

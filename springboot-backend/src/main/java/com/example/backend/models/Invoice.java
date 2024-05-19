@@ -21,6 +21,7 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    private long userId; // uploaded by user with id
     @Enumerated(EnumType.STRING)
     private TypeEnum type;
     private LocalDate date;
