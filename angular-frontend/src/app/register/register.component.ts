@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { SignupRequest } from '../auth-requests';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -10,20 +11,24 @@ import { Router } from '@angular/router';
 })
 export class RegisterComponent {
   signupRequest: SignupRequest = { username: '', password: '', email: '' };
-  errorMessage: string = '';
+  errorMessages: string[] = [];
 
   constructor(private authService: AuthService, private router: Router) {}
 
   register() {
-    this.authService.register(this.signupRequest).subscribe(
-      response => {
+    this.authService.register(this.signupRequest).subscribe({
+      next: (response) => {
         // Handle successful registration, maybe navigate to login page
         this.router.navigate(['/login']);
       },
-      error => {
+      error: (error: HttpErrorResponse) => {
         // Handle registration error
-        this.errorMessage = 'Failed to register';
+        if (error.status === 400 && error.error instanceof Array) {
+          this.errorMessages = error.error;
+        } else {
+          this.errorMessages = ['Failed to register'];
+        }
       }
-    );
+    });
   }
 }

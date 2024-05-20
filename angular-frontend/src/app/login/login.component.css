@@ -62,3 +62,18 @@ body {
     text-decoration: underline;
     color: #02264b; 
 }
+
+.error-messages {
+    margin-top: 10px;
+    color: red;
+}
+
+.error-messages ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.error-messages li {
+    margin: 5px 0;
+}
+

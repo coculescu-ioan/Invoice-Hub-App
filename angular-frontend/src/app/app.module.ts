@@ -8,13 +8,17 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ForgetPasswordComponent } from './forget-password/forget-password.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+
+import { UserService } from './user.service';  
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     RegisterComponent,
-    ForgetPasswordComponent
+    ForgetPasswordComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule,
@@ -22,7 +26,7 @@ import { ForgetPasswordComponent } from './forget-password/forget-password.compo
     FormsModule,  
     HttpClientModule
   ],
-  providers: [],
+  providers: [UserService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

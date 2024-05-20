@@ -1,12 +1,17 @@
 <div class="login-container">
     <h2>Welcome to Invoice-Hub!</h2>
-    <form class="login-form">
-        <input type="text" placeholder="Username" name="username" required>
-        <input type="password" placeholder="Password" name="password" required>
-        <button type="submit">Sign in</button>
+    <form class="login-form" (ngSubmit)="login()" #loginForm="ngForm">
+        <input type="text" placeholder="Username" name="username" [(ngModel)]="loginRequest.username" required>
+        <input type="password" placeholder="Password" name="password" [(ngModel)]="loginRequest.password" required>
+        <button type="submit" [disabled]="!loginForm.form.valid">Sign in</button>
     </form>
     <div class="login-footer">
-        <a routerLink="/register">Don’t have an account? Register</a>
+        <a routerLink="/register">Don't have an account? Sign up</a>
         <a routerLink="/forget-password">Forgot your password? Click here</a>
+    </div>
+    <div *ngIf="errorMessages.length > 0" class="error-messages">
+        <ul>
+          <li *ngFor="let errorMessage of errorMessages">{{ errorMessage }}</li>
+        </ul>
     </div>
 </div>
