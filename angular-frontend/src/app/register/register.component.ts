@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth.service';
-import { SignupRequest } from '../auth-requests';
+import { AuthService } from '../auth/auth.service';
+import { SignupRequest } from '../auth/auth-requests';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 

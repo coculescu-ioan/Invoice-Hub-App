@@ -15,6 +15,10 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 300px;
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Center the container precisely */
 }
 
 .login-container h2 {
@@ -77,3 +81,8 @@ body {
     margin: 5px 0;
 }
 
+.error-message {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: red;
+}

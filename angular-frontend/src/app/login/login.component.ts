@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth.service';
-import { LoginRequest } from '../auth-requests';
+import { AuthService } from '../auth/auth.service';
+import { LoginRequest } from '../auth/auth-requests';
 import { Router } from '@angular/router';
 import { UserService } from '../user.service';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +13,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class LoginComponent {
   loginRequest: LoginRequest = { username: '', password: '' };
   errorMessages: string[] = [];
+  token: string | null = null;
 
   constructor(
     private authService: AuthService, 
@@ -22,13 +23,18 @@ export class LoginComponent {
 
   login() {
     this.authService.login(this.loginRequest).subscribe({
-      next: (response) => {
-        // Handle successful login and navigate to dashboard
-        this.userService.setUsername(this.loginRequest.username);
-        this.router.navigate(['/dashboard']);
+      next: (response: HttpResponse<any>) => {
+        this.token = this.authService.getToken();
+        if (this.token) {
+          console.log('Token:', this.token);  // Debugging line
+          this.userService.setUsername(this.loginRequest.username);
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.errorMessages = ['Failed to login'];
+        }
       },
       error: (error: HttpErrorResponse) => {
-        // Handle login error (DOES NOT WORK)
+        console.log(this.errorMessages); // Debugging line
         if (error.status === 401 && error.error instanceof Array) {
           this.errorMessages = error.error;
         } else {

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth.service';
-import { ForgetPasswordRequest } from '../auth-requests';
+import { AuthService } from '../auth/auth.service';
+import { ForgetPasswordRequest } from '../auth/auth-requests';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-forget-password',
@@ -10,19 +11,23 @@ import { ForgetPasswordRequest } from '../auth-requests';
 export class ForgetPasswordComponent {
   forgetPasswordRequest: ForgetPasswordRequest = { email: '' };
   message: string = '';
+  errorMessages: string[] = [];
 
   constructor(private authService: AuthService) {}
 
   forgetPassword() {
-    this.authService.forgetPassword(this.forgetPasswordRequest).subscribe(
-      response => {
+    this.authService.forgetPassword(this.forgetPasswordRequest).subscribe({
+      next: (response: HttpResponse<any>) => {
         // Handle successful password reset request
         this.message = 'Password reset instructions sent to your email';
       },
-      error => {
-        // Handle error
-        this.message = 'Failed to send password reset instructions';
+      error: (error: HttpErrorResponse) => {
+        if (error.status === 400 && error.error instanceof Array) {
+          this.errorMessages = error.error;
+        } else {
+          this.errorMessages = ['Failed to send password reset instructions'];
+        }
       }
-    );
+    });
   }
 }

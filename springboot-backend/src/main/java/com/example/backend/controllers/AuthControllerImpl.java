@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
+//@CrossOrigin(origins = "http://localhost:4200")
 public class AuthControllerImpl implements AuthController{
 
     private final AuthService authService;
@@ -77,6 +77,6 @@ public class AuthControllerImpl implements AuthController{
                     .collect(Collectors.toList());
             return ResponseEntity.badRequest().body(errorMessages);
         }
-        return null;
+        return authService.forgetPassword(forgetPasswordRequest);
     }
 }
