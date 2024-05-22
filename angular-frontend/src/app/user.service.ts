@@ -1,4 +1,8 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+import { AuthService } from './auth/auth.service';  
 
 @Injectable({
   providedIn: 'root'
@@ -6,8 +10,7 @@ import { Injectable } from '@angular/core';
 export class UserService {
   private readonly USERNAME_KEY = 'username';
 
-  constructor() {
-    // Retrieve the username from session storage when the service is instantiated
+  constructor(private http: HttpClient, private authService: AuthService) {
     this.username = sessionStorage.getItem(this.USERNAME_KEY) || '';
   }
 
@@ -15,11 +18,16 @@ export class UserService {
 
   setUsername(username: string) {
     this.username = username;
-    // Store the username in session storage
     sessionStorage.setItem(this.USERNAME_KEY, username);
   }
 
   getUsername(): string {
     return this.username;
+  }
+
+  getUploadSessions(limit: number): Observable<any[]> {
+    const token = this.authService.getToken();  // Use AuthService to get the token
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any[]>(`/api/file/uploadSessions?limit=${limit}`, { headers });
   }
 }

@@ -1,0 +1,67 @@
+<div class="invoice-container">
+  <h2>Upload Invoice</h2>
+
+  <!-- File Picker -->
+  <input type="file" (change)="onFileSelected($event)" accept=".txt,.pdf" />
+
+  <!-- Manual Invoice Data Entry -->
+  <div>
+    <label for="invoiceNumber">Invoice Number:</label>
+    <input type="text" id="invoiceNumber" [(ngModel)]="invoice.invoiceNumber" />
+  </div>
+  <div>
+    <label for="invoiceDate">Invoice Date:</label>
+    <input type="date" id="invoiceDate" [(ngModel)]="invoice.invoiceDate" />
+  </div>
+  <div>
+    <label for="type">Type:</label>
+    <input type="text" id="type" [(ngModel)]="invoice.type" />
+  </div>
+  <div>
+    <label for="currency">Currency:</label>
+    <input type="text" id="currency" [(ngModel)]="invoice.currency" />
+  </div>
+  <div>
+    <label for="taxPercent">Tax Percent:</label>
+    <input type="number" id="taxPercent" [(ngModel)]="invoice.taxPercent" />
+  </div>
+  <div>
+    <label for="clientName">Client Name:</label>
+    <input type="text" id="clientName" [(ngModel)]="invoice.clientName" />
+  </div>
+  <div>
+    <label for="clientId">Client ID:</label>
+    <input type="text" id="clientId" [(ngModel)]="invoice.clientId" />
+  </div>
+  <div>
+    <label for="clientAddress">Client Address:</label>
+    <input type="text" id="clientAddress" [(ngModel)]="invoice.clientAddress" />
+  </div>
+  <div>
+    <label for="supplierName">Supplier Name:</label>
+    <input type="text" id="supplierName" [(ngModel)]="invoice.supplierName" />
+  </div>
+  <div>
+    <label for="supplierId">Supplier ID:</label>
+    <input type="text" id="supplierId" [(ngModel)]="invoice.supplierId" />
+  </div>
+  <div>
+    <label for="supplierAddress">Supplier Address:</label>
+    <input type="text" id="supplierAddress" [(ngModel)]="invoice.supplierAddress" />
+  </div>
+  <div>
+    <label for="taxExclusiveAmount">Tax Exclusive Amount:</label>
+    <input type="number" id="taxExclusiveAmount" [(ngModel)]="invoice.taxExclusiveAmount" />
+  </div>
+  <div>
+    <label for="taxAmount">Tax Amount:</label>
+    <input type="number" id="taxAmount" [(ngModel)]="invoice.taxAmount" />
+  </div>
+  <div>
+    <label for="taxInclusiveAmount">Tax Inclusive Amount:</label>
+    <input type="number" id="taxInclusiveAmount" [(ngModel)]="invoice.taxInclusiveAmount" />
+  </div>
+
+  <!-- Upload Button -->
+  <button (click)="uploadInvoice()">Upload</button>
+</div>

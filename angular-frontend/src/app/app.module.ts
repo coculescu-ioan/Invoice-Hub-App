@@ -12,7 +12,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 
 import { AuthService } from './auth/auth.service';  
 import { AuthInterceptor } from './auth/auth-interceptor.service';
-import { UserService } from './user.service';  
+import { UserService } from './user.service';
+import { InvoiceUploadComponent } from './invoice-upload/invoice-upload.component';  
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { UserService } from './user.service';
     LoginComponent,
     RegisterComponent,
     ForgetPasswordComponent,
-    DashboardComponent
+    DashboardComponent,
+    InvoiceUploadComponent
   ],
   imports: [
     BrowserModule,

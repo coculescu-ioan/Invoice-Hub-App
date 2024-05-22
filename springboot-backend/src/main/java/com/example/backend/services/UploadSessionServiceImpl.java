@@ -6,6 +6,8 @@ import com.example.backend.models.User;
 import com.example.backend.repositories.UploadSessionRepository;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -25,17 +27,20 @@ public class UploadSessionServiceImpl implements UploadSessionService{
 
 
     @Override
-    public List<UploadSession> loadAll() {
+    public List<UploadSession> loadAll(int limit) {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            return Objects.equals(user.getRole(), UserRoleEnum.ADMIN) ?
-                    uploadSessionRepository.findAll() :
-                    uploadSessionRepository.findAllByUserId(user.getId());
-        }
-        else {
+            Pageable pageable = PageRequest.of(0, limit);
+            if (Objects.equals(user.getRole(), UserRoleEnum.ADMIN)) {
+                return uploadSessionRepository.findTopSessionsByOrderByIdDesc(pageable);
+            } else {
+                return uploadSessionRepository.findTopSessionsByUserIdOrderByIdDesc(user.getId(), pageable);
+            }
+        } else {
             throw new UsernameNotFoundException("User with username " + username + " not found.");
         }
     }
+
 }

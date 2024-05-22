@@ -1,8 +1,10 @@
 package com.example.backend.controllers;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.example.backend.exceptions.StorageFileNotFoundException;
+import com.example.backend.models.UploadSession;
 import com.example.backend.services.InvoiceService;
 import com.example.backend.services.StorageService;
 import com.example.backend.services.UploadSessionService;
@@ -55,10 +57,10 @@ public class FileControllerImpl implements FileController {
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
-    // frontend: SessionsComponent
     @GetMapping("/uploadSessions")
-    public ResponseEntity<?> getSessions() {
-        return ResponseEntity.ok(uploadSessionService.loadAll());
+    public ResponseEntity<?> getSessions(@RequestParam int limit) {
+        List<UploadSession> sessions = uploadSessionService.loadAll(limit);
+        return ResponseEntity.ok(sessions);
     }
 
     // frontend: InvoicesComponent
