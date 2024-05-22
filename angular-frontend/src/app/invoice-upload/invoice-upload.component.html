@@ -2,9 +2,14 @@
   <h2>Upload Invoice</h2>
 
   <!-- File Picker -->
-  <input type="file" (change)="onFileSelected($event)" accept=".txt,.pdf" />
+  <label>
+    <input type="checkbox" [(ngModel)]="fileUploadEnabled"/>
+    Enable file upload
+  </label>
+  <input *ngIf="fileUploadEnabled" type="file" (change)="onFileSelected($event)" accept=".txt,.pdf" />
 
   <!-- Manual Invoice Data Entry -->
+ <div *ngIf="!fileUploadEnabled">
   <div>
     <label for="invoiceNumber">Invoice Number:</label>
     <input type="text" id="invoiceNumber" [(ngModel)]="invoice.invoiceNumber" />
@@ -61,7 +66,13 @@
     <label for="taxInclusiveAmount">Tax Inclusive Amount:</label>
     <input type="number" id="taxInclusiveAmount" [(ngModel)]="invoice.taxInclusiveAmount" />
   </div>
+ </div>
 
   <!-- Upload Button -->
   <button (click)="uploadInvoice()">Upload</button>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+  
 </div>

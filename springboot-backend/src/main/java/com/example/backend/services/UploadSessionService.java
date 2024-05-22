@@ -5,5 +5,5 @@ import com.example.backend.models.UploadSession;
 import java.util.List;
 
 public interface UploadSessionService {
-    List<UploadSession> loadAll(int limit);
+    List<UploadSession> findLastSessions();
 }

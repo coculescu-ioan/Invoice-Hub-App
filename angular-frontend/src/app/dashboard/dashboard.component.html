@@ -15,7 +15,6 @@
           <h3>Upload Sessions</h3>
           <div *ngIf="uploadSessions.length > 0; else noSessions">
             <div *ngFor="let session of uploadSessions" class="session">
-              <p>Session ID: {{ session.id }}</p>
               <p>Start Time: {{ session.startTime }}</p>
               <p>End Time: {{ session.endTime }}</p>
               <p>Status: {{ session.status }}</p>

@@ -10,9 +10,9 @@ import { RegisterComponent } from './register/register.component';
 import { ForgetPasswordComponent } from './forget-password/forget-password.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
-import { AuthService } from './auth/auth.service';  
-import { AuthInterceptor } from './auth/auth-interceptor.service';
-import { UserService } from './user.service';
+import { AuthService } from './services/auth.service';  
+import { AuthInterceptor } from './services/auth-interceptor.service';
+import { UserService } from './services/user.service';
 import { InvoiceUploadComponent } from './invoice-upload/invoice-upload.component';  
 
 @NgModule({

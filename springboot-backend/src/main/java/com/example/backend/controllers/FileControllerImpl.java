@@ -57,9 +57,15 @@ public class FileControllerImpl implements FileController {
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
-    @GetMapping("/uploadSessions")
-    public ResponseEntity<?> getSessions(@RequestParam int limit) {
-        List<UploadSession> sessions = uploadSessionService.loadAll(limit);
+//    @GetMapping("/uploadSessions")
+//    public ResponseEntity<?> getSessions(@RequestParam int limit) {
+//        List<UploadSession> sessions = uploadSessionService.findLastSessions();
+//        return ResponseEntity.ok(sessions);
+//    }
+
+    @GetMapping("/lastSessions")
+    public ResponseEntity<?> getLastSessions() {
+        List<UploadSession> sessions = uploadSessionService.findLastSessions();
         return ResponseEntity.ok(sessions);
     }
 

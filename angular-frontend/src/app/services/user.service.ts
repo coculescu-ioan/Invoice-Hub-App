@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-import { AuthService } from './auth/auth.service';  
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
+  private baseUrl = 'http://localhost:8080/api';
   private readonly USERNAME_KEY = 'username';
 
   constructor(private http: HttpClient, private authService: AuthService) {
@@ -25,9 +25,20 @@ export class UserService {
     return this.username;
   }
 
-  getUploadSessions(limit: number): Observable<any[]> {
-    const token = this.authService.getToken();  // Use AuthService to get the token
+  getLastSessions(): Observable<any[]> {
+    const token = this.authService.getToken();
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<any[]>(`/api/file/uploadSessions?limit=${limit}`, { headers });
+    return this.http.get<any[]>(`${this.baseUrl}/file/lastSessions`, { headers });
+  }
+
+  uploadFile(file: File): Observable<any> {
+    const formData: FormData = new FormData();
+    formData.append('file', file);
+
+    const token = this.authService.getToken(); 
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.post<any>(`${this.baseUrl}/file/upload`, formData, { headers });
   }
 }
+

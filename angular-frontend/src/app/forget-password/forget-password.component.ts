@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
-import { ForgetPasswordRequest } from '../auth/auth-requests';
+import { AuthService } from '../services/auth.service';
+import { ForgetPasswordRequest } from '../services/auth-requests';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 
 @Component({

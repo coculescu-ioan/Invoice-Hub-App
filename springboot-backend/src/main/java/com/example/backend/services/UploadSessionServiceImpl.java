@@ -27,16 +27,15 @@ public class UploadSessionServiceImpl implements UploadSessionService{
 
 
     @Override
-    public List<UploadSession> loadAll(int limit) {
+    public List<UploadSession> findLastSessions() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            Pageable pageable = PageRequest.of(0, limit);
             if (Objects.equals(user.getRole(), UserRoleEnum.ADMIN)) {
-                return uploadSessionRepository.findTopSessionsByOrderByIdDesc(pageable);
+                return uploadSessionRepository.findLastSessionsForAdmin();
             } else {
-                return uploadSessionRepository.findTopSessionsByUserIdOrderByIdDesc(user.getId(), pageable);
+                return uploadSessionRepository.findLastSessionsForUser(user.getId());
             }
         } else {
             throw new UsernameNotFoundException("User with username " + username + " not found.");
