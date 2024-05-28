@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../services/user.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,7 +10,7 @@ import { Router } from '@angular/router';
 })
 export class DashboardComponent implements OnInit {
   username: string = '';
-  userRole: string = '';
+  userRole: string | null = '';
   uploadSessions: any[] = [];
 
   constructor(
@@ -19,7 +20,8 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.username = this.userService.getUsername();
-
+    this.userRole = sessionStorage.getItem("user-role");
+    console.log('User role:', this.userRole);
     this.userService.getLastSessions().subscribe(
       response => {
         this.uploadSessions = response;

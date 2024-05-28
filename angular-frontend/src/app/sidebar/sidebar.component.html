@@ -1,0 +1,13 @@
+<div class="sidebar" [ngClass]="{'active': isActive}">
+    <div class="sidebar-header">
+    <h3>Sidebar</h3>
+    <button (click)="toggleSidebar()">&#10006;</button>
+    </div>
+    <ul>
+        <li> <a routerLink="api/file/upload">Upload an invoice</a></li>
+        <li>Invoices</li>
+        <li>Files</li>
+        <li>Sessions</li>
+        <li *ngIf="userRole === 'ADMIN'">Manage users</li>
+    </ul>
+</div>

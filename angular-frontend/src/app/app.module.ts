@@ -13,7 +13,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthService } from './services/auth.service';  
 import { AuthInterceptor } from './services/auth-interceptor.service';
 import { UserService } from './services/user.service';
-import { InvoiceUploadComponent } from './invoice-upload/invoice-upload.component';  
+import { InvoiceUploadComponent } from './invoice-upload/invoice-upload.component';
+import { SidebarComponent } from './sidebar/sidebar.component';  
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { InvoiceUploadComponent } from './invoice-upload/invoice-upload.componen
     RegisterComponent,
     ForgetPasswordComponent,
     DashboardComponent,
-    InvoiceUploadComponent
+    InvoiceUploadComponent,
+    SidebarComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,16 @@
+Type=INVOICE
+Date=2024-01-01
+Currency=EUR
+TaxPercent=9
+ClientName=SC CODRUT SRL
+ClientID=91324566
+ClientAddress=strada X, oras Y, Romania
+SupplierName=SC ANDREI SRL
+SupplierID=35689211
+SupplierAddress=strada A, oras B, Romania
+TaxExclusiveAmount=337
+TaxAmount=30.33
+TaxInclusiveAmount=367.33
+Item=Krabby Patty,12,3.5
+Item=Scooby Snacks,25,10.0
+Item=Duff Beer,20,2.25

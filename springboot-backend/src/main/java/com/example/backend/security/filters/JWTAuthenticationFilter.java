@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -41,5 +42,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                          FilterChain chain, Authentication authResult) {
         String token = jwtUtils.generateToken(((UserDetails)authResult.getPrincipal()).getUsername());
         response.addHeader("Authorization", "Bearer " + token);
+        response.addHeader("Role", ((UserDetails) authResult.getPrincipal())
+                .getAuthorities()
+                .stream().map(GrantedAuthority::getAuthority).findFirst().get());
     }
 }

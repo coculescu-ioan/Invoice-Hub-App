@@ -1,5 +1,26 @@
-.app-container {
+/* .app-container {
     width: 100%;
     height: 100vh; 
     overflow: visible; 
+} */
+
+.app-container {
+    display: flex;
+}
+   
+.toggle-button {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+}
+   
+.content {
+    flex-grow: 1;
+    margin-left: 0;
+    transition: margin-left 0.3s;
+}
+   
+.content.shifted {
+    margin-left: 250px;
 }

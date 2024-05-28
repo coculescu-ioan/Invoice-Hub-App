@@ -10,6 +10,7 @@ import { LoginRequest, SignupRequest, ForgetPasswordRequest, ChangePasswordReque
 export class AuthService {
   private baseUrl = 'http://localhost:8080/api/auth';
   private TOKEN_KEY = 'auth-token';
+  private USER_ROLE = 'user-role';
 
   constructor(private http: HttpClient) {}
 
@@ -24,6 +25,15 @@ export class AuthService {
         } else {
           console.log('Authorization header not found');
         }
+
+        const roleHeader = response.headers.get('Role');
+        if (roleHeader) {
+          sessionStorage.setItem(this.USER_ROLE, roleHeader);
+          console.log('Role stored:', roleHeader);  // Debugging line
+        } else {
+          console.log('Role header not found');
+        }
+
       })
     );
   }
