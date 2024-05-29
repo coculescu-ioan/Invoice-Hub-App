@@ -1,8 +1,9 @@
 <div class="app-container">
-    <button class="toggle-button" (click)="sidebar.toggleSidebar()">Show sidebar</button>
-    <app-sidebar #sidebar></app-sidebar>
-    <div class="content" [ngClass]="{'shifted': sidebar.isActive}">
-        <router-outlet></router-outlet>
-    </div>
+  <div *ngIf="isUserAuthenticated()">
+    <app-headerbar></app-headerbar>
+    <app-sidebar></app-sidebar>
+  </div>
+  <div class="content">
+    <router-outlet></router-outlet>
+  </div>
 </div>
-  

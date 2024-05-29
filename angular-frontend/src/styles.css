@@ -1,9 +1,23 @@
 html, body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    background-color: #73e2c6;
+    background-color: #dadddd;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.component {
+  padding-left: 250px;
+}
+
+.custom-dialog-container .mat-dialog-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
+}
+
+.mat-dialog-container {
+  border-radius: 8px;
+  padding: 16px;
 }

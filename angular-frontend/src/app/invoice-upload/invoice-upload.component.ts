@@ -40,13 +40,7 @@ export class InvoiceUploadComponent {
           }
         }
       });
-
-      console.log('Uploaded Invoice');
-      console.log('Invoice Number:', this.invoice.invoiceNumber);
-      console.log('Invoice Date:', this.invoice.invoiceDate);
-      console.log('Selected File:', this.selectedFile);
     } else {
-      console.error('No file selected');
       this.errorMessage = 'No file selected';
     }
   }

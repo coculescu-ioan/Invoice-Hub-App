@@ -1,13 +1,7 @@
 <div class="dashboard">
-    <div class="top-bar">
-      <h2>Welcome, {{ username }}!</h2>
-      <div class="profile-icon">
-        <img src="assets/profile-icon.png" alt="Profile Icon">
-      </div>
-    </div>
     <div class="main-content">
-      <div class="dashboard-container">
-        <button (click)="onUploadInvoice()">Upload An Invoice</button>
+      <div class="dashboard-container component">
+        <button (click)="onUploadInvoice()">Upload an invoice</button>
         <div class="upload-sessions">
           <h3>Upload Sessions</h3>
           <div *ngIf="uploadSessions.length > 0; else noSessions">
@@ -24,4 +18,3 @@
       </div>
     </div>
   </div>
-  

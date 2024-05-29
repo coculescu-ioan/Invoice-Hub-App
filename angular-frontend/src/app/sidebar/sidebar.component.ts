@@ -17,7 +17,7 @@ export class SidebarComponent {
     console.log('User role:', this.userRole);
   }
 
-  toggleSidebar() {
+  toggle() {
     this.isActive = !this.isActive;
   }
 }

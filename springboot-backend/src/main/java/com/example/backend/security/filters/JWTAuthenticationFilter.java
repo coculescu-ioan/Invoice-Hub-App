@@ -45,5 +45,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.addHeader("Role", ((UserDetails) authResult.getPrincipal())
                 .getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority).findFirst().get());
+        response.addHeader("Access-Control-Expose-Headers", "Role");
     }
 }

@@ -1,0 +1,27 @@
+<div class="files-container component">
+    <h2>File reports</h2>
+    <table class="file-table mat-elevation-z8">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Upload session</th>
+        <th>Filename</th>
+        <th>Type</th>
+        <th>Date uploaded</th>
+        <th>Size</th>
+        <th>Status</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let file of files">
+        <td>{{ file.id }}</td>
+        <td>{{ file.uploadSessionId }}</td>
+        <td>{{ file.filename }}</td>
+        <td>{{ file.filetype }}</td>
+        <td>{{ file.dateUploaded }}</td>
+        <td>{{ file.size }}</td>
+        <td>{{ file.status }}</td>
+      </tr>
+      </tbody>
+    </table>
+</div>

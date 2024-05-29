@@ -1,0 +1,37 @@
+:host {
+  display: block;
+}
+
+.mat-dialog-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #adbddf;
+  border-radius: 5px;
+}
+
+.mat-dialog-title {
+  font-weight: bold;
+  color: #f44336 !important;
+}
+
+.mat-dialog-content {
+  font-size: 16px;
+  color: #333;
+  text-align: center;
+}
+
+.mat-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.mat-dialog-actions button {
+  margin-left: 8px;
+}

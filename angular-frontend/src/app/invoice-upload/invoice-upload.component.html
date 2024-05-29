@@ -1,10 +1,10 @@
-<div class="invoice-container">
+<div class="component">
   <h2>Upload Invoice</h2>
 
   <!-- File Picker -->
   <label>
     <input type="checkbox" [(ngModel)]="fileUploadEnabled"/>
-    Enable file upload
+    File upload enabled
   </label>
   <input *ngIf="fileUploadEnabled" type="file" (change)="onFileSelected($event)" accept=".txt,.pdf" />
 
@@ -74,5 +74,5 @@
   <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
   </div>
-  
+
 </div>
